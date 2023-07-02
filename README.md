@@ -16,4 +16,17 @@ A api escolhida foi a do banco central, esta api fornece diversos dados público
 
 ### Ferramentas
 
-As ferramentas utilizadas para realizar a tarefa foram: - Python 3.X - Pandas - Numpy - openxlm - - - -
+As ferramentas utilizadas para realizar a tarefa foram:
+
+    * Python 3.X
+    * Pandas
+    * openxlm
+    * pprint
+    * requests
+    * pyarrow
+
+## Como utilizar:
+
+    1. Crie um ambiente virtual `python3 -M venv venv`;
+    2. Instale as dependencias `pip install -r requirements.txt`;
+    3. Execute o arquivo `python3 main.py`

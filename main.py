@@ -1,92 +1,49 @@
-from pprint import pprint
-import requests
 import pandas as pd
-import numpy as np
-import json
+import requests
 
+class BCB_api:
+    def __init__(self, qnt_data=10000):
+        self.qnt_data = qnt_data
+        self.skip_index = 0
+        self.count = 0
+        self.df_init = pd.DataFrame()
 
+    def make_request(self):
+        while True:
+            for i in range(1):
+                self.count += 1
 
-# class BCB_Cedulas:
-#     def __init__(self, url):
-#         self.url
-#         self.data
+            print(f'Capturando tabela {self.count}')
+            url = f'https://olinda.bcb.gov.br/olinda/servico/mecir_dinheiro_em_circulacao/versao/v1/odata/informacoes_diarias?$top={self.qnt_data}&$skip={self.skip_index}&$orderby=Data%20desc&$format=json'
+            req = requests.get(url)
+            data = req.json()
 
-#     def request(url):        
-#         req = requests.get(url)
-#         data = req.json()
-#         #pprint(data)
-#         return data
+            df = pd.DataFrame(data['value'])
 
-    
+            if len(data['value']) < 1:
+                break
 
-#     def create_df(data):
-#         df = pd.DataFrame(data)
+            df['Valor'] = df['Valor'].map('R${:,.2f}'.format)
+            df['Quantidade'] = df['Quantidade'].map('{:,.3f}'.format)
 
-#         # #Formatação de valores
-#         # df['Valor'] = df['Valor'].map('R${:,.2f}'.format)
+            self.df_init = pd.concat([self.df_init, df])
+            self.skip_index += self.qnt_data
 
-#         return df
-    
-#     def pagination(self, url, data):
-#         df_init = pd.DataFrame()
+    def export_to_excel(self, filename):
+        print(self.df_init)
+        print('Criando arquivo excel...')
+        self.df_init.to_excel(filename, index=False)
 
-#         while True:
-#             self.request(url)
-#             table = self.create_df(data)
-#             if len(data['value']) < 1:
-#                 break
-#             df_init = pd.concat([df_init], table )
+    def export_to_parquet(self, filename):
+        print('Criando arquivo parquet...')
+        self.df_init.to_parquet(filename)
 
-#     # def main(self, url):
-#     #     return self.request(url)
+    def run(self):
+        self.make_request()
+        self.export_to_excel('BCB_circulacao.xlsx')
+        self.export_to_parquet('BCB_circulacao.parquet')
+        print('FINISH')
 
-
-# # url = 'https://olinda.bcb.gov.br/olinda/servico/mecir_dinheiro_em_circulacao/versao/v1/odata/informacoes_diarias?$top=1000&$orderby=Data%20desc&$format=json'
-# url = f'https://olinda.bcb.gov.br/olinda/servico/mecir_dinheiro_em_circulacao/versao/v1/odata/informacoes_diarias?$top={qnt_data}&$skip={skip_index}&$orderby=Data%20desc&$format=json'
-# data = BCB_Cedulas.request(url)
-# df = BCB_Cedulas.create_df(data['value'])
-# print(df)
-
-
-def req_pagination():
-
-    
-    df_init = pd.DataFrame()
-    skip_index = 0
-    qnt_data = 10000
-    count = 0
-
-
-    while True:
-        for i in range(10):
-            count += 1
-        
-        print(f'Capturando tabela {count}')
-        url = f'https://olinda.bcb.gov.br/olinda/servico/mecir_dinheiro_em_circulacao/versao/v1/odata/informacoes_diarias?$top={qnt_data}&$skip={skip_index}&$orderby=Data%20desc&$format=json'
-        req = requests.get(url)
-        data = req.json()
-
-        df = pd.DataFrame(data['value'])
-
-        if len(data['value']) < 1:
-            break
-        df_init = pd.concat([df_init, df])
-        skip_index += qnt_data
-
-    print(df_init)
-    print('Criando arquivo excel...')
-
-    df_init.to_excel('BCB_circulacao.xlsx', index=False)
-
-    '''
-    Dica++: Exportei os dados também no formato parquet 
-        por se tratar do formato ideal para a transação de dados
-        entre sistemas por ser mais leve 
-    '''
-
-    print('Criando arquivo parquet...')
-    df_init.to_parquet('BCB_circulacao.parquet')
-    
-    print('FINISH')
-
-req_pagination()
+if __name__ == '__main__':
+    req = BCB_api()
+    req.run()
