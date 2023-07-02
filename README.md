@@ -21,7 +21,6 @@ As ferramentas utilizadas para realizar a tarefa foram:
     * Python 3.X
     * Pandas
     * openxlm
-    * pprint
     * requests
     * pyarrow
 
