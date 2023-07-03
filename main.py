@@ -10,8 +10,7 @@ class BCB_api:
 
     def make_request(self):
         while True:
-            for i in range(1):
-                self.count += 1
+            self.count += 1
 
             print(f'Capturando tabela {self.count}')
             url = f'https://olinda.bcb.gov.br/olinda/servico/mecir_dinheiro_em_circulacao/versao/v1/odata/informacoes_diarias?$top={self.qnt_data}&$skip={self.skip_index}&$orderby=Data%20desc&$format=json'
@@ -22,7 +21,8 @@ class BCB_api:
 
             if len(data['value']) < 1:
                 break
-
+            
+            # Formatando dados
             df['Valor'] = df['Valor'].map('R${:,.2f}'.format)
             df['Quantidade'] = df['Quantidade'].map('{:,.3f}'.format)
 
